@@ -39,9 +39,9 @@ class PublicUsersApiTests(TestCase):
     def test_user_exists(self):
         """Test if user alrady exists"""
         payload = {
-            'email': 'test@net.net', 
+            'email': 'test@net.net',
             'password': 'testpass',
-            'name': 'Maks',
+            'name': 'Maks'
         }
         create_user(**payload)
 
@@ -68,12 +68,13 @@ class PublicUsersApiTests(TestCase):
         """Test that a token is created for the user"""
         payload = {
             'email': 'test@max.net',
-            'password': 'testpass',
+            'password': 'Testpass123',
             'name': 'Maks'
         }
         create_user(**payload)
 
         res = self.client.post(TOKEN_URL, payload)
+
         self.assertIn('token', res.data)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
@@ -82,7 +83,7 @@ class PublicUsersApiTests(TestCase):
         create_user(email='test@max.net', password='testpass')
         payload = {
             'email': 'test@max.net',
-            'password': 'wrongpass',
+            'password': 'Wrongpass',
             'name': 'Maks'
         }
 
