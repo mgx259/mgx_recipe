@@ -242,3 +242,50 @@ class RecipeImageUploadTests(TestCase):
         res = self.client.post(url, {'image': 'notimage'}, format='multipart')
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_filter_recipe_by_tags(self):
+        """Test returning recipes with specific tags"""
+        recp1 = sample_recipe(user=self.user, title='Tie vegitable curry')
+        recp2 = sample_recipe(user=self.user, title='Obergine with tahini')
+        tag1 = sample_tag(user=self.user, name='Vegan')
+        tag2 = sample_tag(user=self.user, name='Vegetarian')
+        recp1.tags.add(tag1)
+        recp2.tags.add(tag2)
+        recp3 = sample_recipe(user=self.user, title='Fish and Chips')
+
+        res = self.client.get(
+            RECIPE_URL,
+            {'tags': f'{tag1.id},{tag2.id}'}
+        )
+
+        serializer1 = RecipeSerializer(recp1)
+        serializer2 = RecipeSerializer(recp2)
+        serializer3 = RecipeSerializer(recp3)
+
+        self.assertIn(serializer1.data, res.data)
+        self.assertIn(serializer2.data, res.data)
+        self.assertNotIn(serializer3.data, res.data)
+
+    def test_filter_recipe_by_ingredient(self):
+        """Test returning recipes with specific ingredients"""
+        recp1 = sample_recipe(user=self.user, title='Posh beans on toast')
+        recp2 = sample_recipe(user=self.user, title='Chicken cacciatore')
+        recp3 = sample_recipe(user=self.user, title='Steak and Mushrooms')
+        ing1 = sample_ingredient(user=self.user, name='Feta cheese')
+        ing2 = sample_ingredient(user=self.user, name='Chicken')
+
+        recp1.ingredients.add(ing1)
+        recp2.ingredients.add(ing2)
+
+        res = self.client.get(
+            RECIPE_URL,
+            {'ingredients': '{},{}'.format(ing1.id, ing2.id)}
+        )
+
+        ser1 = RecipeSerializer(recp1)
+        ser2 = RecipeSerializer(recp2)
+        ser3 = RecipeSerializer(recp3)
+
+        self.assertIn(ser1.data, res.data)
+        self.assertIn(ser2.data, res.data)
+        self.assertNotIn(ser3.data, res.data)
